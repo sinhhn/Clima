@@ -22,7 +22,7 @@ class WeatherViewController: UIViewController,CLLocationManagerDelegate {
     //TODO: Declare instance variables here
     let locationManager = CLLocationManager()
 
-    
+    let weatherDataModel =  WeatherDataModel()
     //Pre-linked IBOutlets
     @IBOutlet weak var weatherIcon: UIImageView!
     @IBOutlet weak var cityLabel: UILabel!
@@ -37,6 +37,7 @@ class WeatherViewController: UIViewController,CLLocationManagerDelegate {
         locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
         locationManager.requestWhenInUseAuthorization()
         locationManager.startUpdatingLocation()
+        
     }
     
     
@@ -51,6 +52,7 @@ class WeatherViewController: UIViewController,CLLocationManagerDelegate {
             response in
             if response.result.isSuccess {
                 let weatherData: JSON = JSON(response.result.value!)
+                print(weatherData)
                 self.updateWeatherData(json: weatherData)
             }
             else {
@@ -69,8 +71,14 @@ class WeatherViewController: UIViewController,CLLocationManagerDelegate {
     
     //Write the updateWeatherData method here:
     func updateWeatherData(json: JSON) {
-        let temp = json["main"]["temp"]
-        print("Temp: \(temp)")
+        if let temp = json["main"]["temp"].double {
+            weatherDataModel.temperature = Int(temp - 273.15)
+            weatherDataModel.city = json["name"].stringValue
+            weatherDataModel.condition = json["weather"]["id"][0].intValue
+            weatherDataModel.weatherIconName = weatherDataModel.updateWeatherIcon(condition: weatherDataModel.condition)
+            updateUIWithWeatherData()
+        }
+        
     }
 
     
@@ -81,7 +89,12 @@ class WeatherViewController: UIViewController,CLLocationManagerDelegate {
     
     
     //Write the updateUIWithWeatherData method here:
-    
+    func updateUIWithWeatherData() {
+        print(weatherDataModel.city)
+        cityLabel.text = weatherDataModel.city
+        temperatureLabel.text = "\(weatherDataModel.temperature)°"
+        weatherIcon.image = UIImage(named: weatherDataModel.weatherIconName)
+    }
     
     
     
@@ -105,13 +118,12 @@ class WeatherViewController: UIViewController,CLLocationManagerDelegate {
         }
     }
     
+    
+    //Write the didFailWithError method here:
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print(error)
         cityLabel.text = "Location Unavailable"
     }
-    //Write the didFailWithError method here:
-    
-    
     
 
     
