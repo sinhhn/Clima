@@ -151,10 +151,4 @@ class WeatherViewController: UIViewController,CLLocationManagerDelegate, ChangeC
         }
         
     }
-    
-    
-    
-    
 }
-
-
